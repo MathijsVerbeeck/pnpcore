@@ -73,6 +73,16 @@ namespace PnP.Core.Model.Security
         #region Methods
 
         /// <summary>
+        /// Grants users permissions to an existing sharing link
+        /// </summary>
+        Task GrantPermissionsAsync(GrantAccessOptions options);
+
+        /// <summary>
+        /// Grants users permissions to an existing sharing link
+        /// </summary>
+        void GrantPermissions(GrantAccessOptions options);
+
+        /// <summary>
         /// Delete a specific permission
         /// </summary>
         Task DeletePermissionAsync();

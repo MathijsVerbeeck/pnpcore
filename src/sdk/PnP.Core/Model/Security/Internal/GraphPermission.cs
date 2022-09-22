@@ -2,7 +2,11 @@
 using PnP.Core.Services;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PnP.Core.Model.Security
@@ -43,6 +47,30 @@ namespace PnP.Core.Model.Security
         #endregion
 
         #region Methods
+
+        public async Task GrantPermissionsAsync(GrantAccessOptions grantAccessOptions)
+        {
+            dynamic body = new ExpandoObject();
+            body.roles = grantAccessOptions.Roles.Select(y => y.ToString()).ToList();
+            body.recipients = grantAccessOptions.Recipients;
+
+            var apiCall = new ApiCall($"shares/{Link.WebUrl}/permission/grant", ApiType.GraphBeta, jsonBody: JsonSerializer.Serialize(body, typeof(ExpandoObject), PnPConstants.JsonSerializer_IgnoreNullValues));
+
+            var response = await RawRequestAsync(apiCall, HttpMethod.Post).ConfigureAwait(false);
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+
+            }
+            else
+            {
+                throw new Exception("Error occured during creation");
+            }
+        }
+
+        public void GrantPermissions(GrantAccessOptions options)
+        {
+            GrantPermissionsAsync(options).GetAwaiter().GetResult();
+        }
 
         public async Task DeletePermissionAsync()
         {

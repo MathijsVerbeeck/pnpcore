@@ -24,6 +24,12 @@ namespace PnP.Core.Model.Security
         /// Specific people in the recipients collection can use the link to get access. Only available in OneDrive for Business and SharePoint.
         /// </summary>
         [EnumMember(Value = "users")]
-        Users
+        Users,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        [EnumMember(Value = "existingAccess")]
+        ExistingAccess
     }
 }

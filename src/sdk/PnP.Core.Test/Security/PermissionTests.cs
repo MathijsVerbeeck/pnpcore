@@ -441,6 +441,60 @@ namespace PnP.Core.Test.Security
             await TestAssets.CleanupTestDocumentAsync(2);
         }
 
+        [TestMethod]
+        public async Task GrantPermissionsToSharingLinkAsyncTest()
+        {
+            TestCommon.Instance.Mocking = false;
+
+            (_, _, string documentUrl) = await TestAssets.CreateTestDocumentAsync(0);
+
+            using (var context = await TestCommon.Instance.GetContextAsync(TestCommon.TestSite, 1))
+            {
+
+                var file = await context.Web.GetFileByServerRelativeUrlAsync(documentUrl);
+
+                var testUser = context.Web.SiteUsers.FirstOrDefault(p => p.PrincipalType == PrincipalType.User);
+                var extraUser = context.Web.SiteUsers.Skip(1).FirstOrDefault(p => p.PrincipalType == PrincipalType.User);
+
+                var driveRecipients = new List<IDriveRecipient>()
+                {
+                    UserLinkOptions.CreateDriveRecipient(testUser.Mail)
+                };
+
+                var shareRequestOptions = new InviteOptions()
+                {
+                    Message = "I'd like to share this file with you",
+                    RequireSignIn = true,
+                    SendInvitation = true,
+                    Recipients = driveRecipients,
+                    Roles = new List<PermissionRole> { PermissionRole.Read }
+                };
+
+                var permission = file.CreateSharingInvite(shareRequestOptions);
+                Assert.IsNotNull(permission.Id);
+                Assert.IsTrue(permission.Roles.Contains(PermissionRole.Read));
+
+                // Update sharing link 
+
+                var extraDriveRecipients = new List<IDriveRecipient>()
+                {
+                    UserLinkOptions.CreateDriveRecipient(extraUser.Mail)
+                };
+
+                var grantAccessOptions = new GrantAccessOptions
+                {
+                    Recipients = extraDriveRecipients,
+                    Roles = new List<PermissionRole> { PermissionRole.Write }
+                };
+
+                await permission.GrantPermissionsAsync(grantAccessOptions);
+
+
+            }
+            await TestAssets.CleanupTestDocumentAsync(2);
+        }
+
+
         #endregion
 
         #region Folder sharing tests
